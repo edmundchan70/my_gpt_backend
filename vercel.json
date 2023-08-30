@@ -1,0 +1,10 @@
+{
+    "version": 2,
+    "name": "my_gpt_backend",
+    "builds": [
+      { "src": "script.js", "use": "@vercel/node" }
+    ],
+    "routes": [
+      { "src": "/(.*)", "dest": "/index.js" }
+    ]
+  }

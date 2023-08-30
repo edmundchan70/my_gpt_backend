@@ -1,0 +1,12 @@
+version: 0.2
+phases:
+ pre_build:
+   commands:
+     - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 143501771204.dkr.ecr.us-east-2.amazonaws.com
+ build:
+   commands:
+     - docker build -t api .
+     - docker tag api:latest 143501771204.dkr.ecr.us-east-2.amazonaws.com/api:latest
+ post_build:
+   commands:
+    - docker push 143501771204.dkr.ecr.us-east-2.amazonaws.com/api:latest

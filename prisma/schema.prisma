@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  
+}
+
+model User {
+  id           Int            @id @default(autoincrement())
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @updatedAt()
+  email        String         @unique
+  firstName    String 
+  lastName     String
+  createAt     DateTime       @default(now())
+  hash         String
+  hashedRT     String?
+  document     document[]
+  conversation conversation[]
+  TextChunk    TextChunk[]
+}
+
+model document {
+  doc_id       String         @id @default(uuid())
+  owner_id     Int
+  user         User           @relation(fields: [owner_id], references: [id])
+  FileName     String
+  content      String
+  CreatDate    DateTime       @default(now())
+  TextChunk    TextChunk[]
+  conversation conversation[]
+
+  @@unique([owner_id, FileName]) // Composite unique constraint
+}
+
+model TextChunk {
+  text_chunk_id Int   @id @default(autoincrement())
+  doc_id       String
+  owner_id     Int
+  user         User     @relation(fields: [owner_id], references: [id])
+  doc          document @relation(fields: [doc_id], references: [doc_id])
+  timeAdd      DateTime @default(now())
+  text_chunk   String
+ 
+}
+
+model conversation {
+  conversation_id  Int @id @default(autoincrement())
+  doc_id      String
+  doc         document @relation(fields: [doc_id], references: [doc_id])
+  owner_id    Int
+  user        User     @relation(fields: [owner_id], references: [id])
+  MessageTime DateTime @default(now())
+  Message     String
+  role        conversation_role 
+ 
+}
+
+enum conversation_role {
+AI
+HUMAN
+}
+ 
