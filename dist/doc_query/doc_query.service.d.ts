@@ -1,9 +1,9 @@
 /// <reference types="multer" />
-import { openAiService } from 'src/openAI/openAi.service';
-import { pineconeService } from 'src/pinecone/pinecone.service';
+import { openAiService } from 'src/service_provider/openAI/openAi.service';
+import { pineconeService } from 'src/service_provider/pinecone/pinecone.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { S3Service } from 'src/S3/S3.service';
+import { S3Service } from 'src/service_provider/S3/S3.service';
 import { chat_body } from './DTO/chat_body.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { Vector } from '@pinecone-database/pinecone';

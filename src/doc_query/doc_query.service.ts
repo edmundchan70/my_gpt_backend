@@ -3,15 +3,14 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { RetrievalQAChain, VectorDBQAChain } from "langchain/chains"
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { text_chunk } from './DTO/text_chunk.dto';
-import { openAiService } from 'src/openAI/openAi.service';
-import { pineconeService } from 'src/pinecone/pinecone.service';
+import { openAiService } from 'src/service_provider/openAI/openAi.service';
+import { pineconeService } from 'src/service_provider/pinecone/pinecone.service';
 import { OpenAI } from "langchain/llms/openai";
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
- 
 import { randomUUID } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { S3Service } from 'src/S3/S3.service';
+import { S3Service } from 'src/service_provider/S3/S3.service';
 import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { DB_to_text_chunk, text_chunk_to_DB, text_chunktoString,text_chunk_filter_skipLine } from './util/HNSWLib';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
@@ -19,7 +18,6 @@ import { user_info } from '../auth/DTO/user_info.dto';
 import { conversation } from './DTO/conversation.dto';
 import { chat_body } from './DTO/chat_body.dto';
 import { AuthService } from 'src/auth/auth.service';
- 
 import { Vector } from '@pinecone-database/pinecone';
 
 

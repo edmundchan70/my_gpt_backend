@@ -9,29 +9,28 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PrismaService = void 0;
+exports.GitService = void 0;
 const common_1 = require("@nestjs/common");
-const client_1 = require(".prisma/client");
-let PrismaService = class PrismaService extends client_1.PrismaClient {
-    constructor() {
-        super({
-            datasources: {
-                db: {
-                    url: process.env.PROD_DB_URL,
-                }
-            }
+const github_1 = require("langchain/document_loaders/web/github");
+let GitService = class GitService {
+    constructor() { }
+    async githubLoader(Url, branch, ignorePath = ["*.md"]) {
+        console.log(ignorePath);
+        const loader = new github_1.GithubRepoLoader(Url, {
+            branch: branch,
+            recursive: true,
+            unknown: "warn",
+            ignoreFiles: ignorePath,
+            accessToken: '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'
         });
-    }
-    async onModuleDestroy() {
-        await this.$connect();
-    }
-    async onModuleInit() {
-        await this.$disconnect();
+        const docs = await loader.load();
+        console.log({ docs });
+        return { docs };
     }
 };
-PrismaService = __decorate([
+GitService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], PrismaService);
-exports.PrismaService = PrismaService;
-//# sourceMappingURL=prisma.service.js.map
+], GitService);
+exports.GitService = GitService;
+//# sourceMappingURL=git.service.js.map

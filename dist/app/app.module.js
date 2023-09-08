@@ -10,15 +10,16 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const auth_module_1 = require("../auth/auth.module");
 const doc_query_module_1 = require("../doc_query/doc_query.module");
-const openAi_module_1 = require("../openAI/openAi.module");
+const openAi_module_1 = require("../service_provider/openAI/openAi.module");
 const prisma_module_1 = require("../prisma/prisma.module");
 const user_module_1 = require("../user/user.module");
-const pinecone_module_1 = require("../pinecone/pinecone.module");
+const pinecone_module_1 = require("../service_provider/pinecone/pinecone.module");
+const git_module_1 = require("../service_provider/git/git.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [auth_module_1.AuthModule, doc_query_module_1.doc_query_module, openAi_module_1.openAiModule, prisma_module_1.PrismaModule, user_module_1.user_Module, pinecone_module_1.pineconeModule],
+        imports: [auth_module_1.AuthModule, doc_query_module_1.doc_query_module, openAi_module_1.openAiModule, prisma_module_1.PrismaModule, user_module_1.user_Module, pinecone_module_1.pineconeModule, git_module_1.GitModule],
     })
 ], AppModule);
 exports.AppModule = AppModule;

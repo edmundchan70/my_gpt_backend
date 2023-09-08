@@ -11,13 +11,13 @@ const common_1 = require("@nestjs/common");
 const doc_query_controller_1 = require("../doc_query/doc_query.controller");
 const doc_query_service_1 = require("./doc_query.service");
 const config_1 = require("@nestjs/config");
-const openAi_module_1 = require("../openAI/openAi.module");
-const pinecone_module_1 = require("../pinecone/pinecone.module");
+const openAi_module_1 = require("../service_provider/openAI/openAi.module");
+const pinecone_module_1 = require("../service_provider/pinecone/pinecone.module");
 const jwt_1 = require("@nestjs/jwt");
 const prisma_module_1 = require("../prisma/prisma.module");
-const S3_module_1 = require("../S3/S3.module");
+const S3_module_1 = require("../service_provider/S3/S3.module");
 const auth_service_1 = require("../auth/auth.service");
-const pinecone_service_1 = require("../pinecone/pinecone.service");
+const pinecone_service_1 = require("../service_provider/pinecone/pinecone.service");
 const pinecone_1 = require("@pinecone-database/pinecone");
 let doc_query_module = class doc_query_module {
 };

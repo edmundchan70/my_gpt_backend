@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Configuration, OpenAIApi } from "openai";
 import "@tensorflow/tfjs-backend-cpu";
-import { chat_message } from '../DTO/openAI/chat_message.dto';
+import { chat_message } from '../../DTO/openAI/chat_message.dto';
 import { text_chunk } from 'src/doc_query/DTO/text_chunk.dto';
 import { text_chunk_toString } from './util/text_chunk_toString';
  

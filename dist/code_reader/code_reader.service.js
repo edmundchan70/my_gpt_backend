@@ -9,29 +9,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PrismaService = void 0;
+exports.CodeReaderService = void 0;
 const common_1 = require("@nestjs/common");
-const client_1 = require(".prisma/client");
-let PrismaService = class PrismaService extends client_1.PrismaClient {
-    constructor() {
-        super({
-            datasources: {
-                db: {
-                    url: process.env.PROD_DB_URL,
-                }
-            }
-        });
-    }
-    async onModuleDestroy() {
-        await this.$connect();
-    }
-    async onModuleInit() {
-        await this.$disconnect();
+let CodeReaderService = class CodeReaderService {
+    constructor() { }
+    query_git_repo(URL) {
+        console.log(URL);
     }
 };
-PrismaService = __decorate([
+CodeReaderService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], PrismaService);
-exports.PrismaService = PrismaService;
-//# sourceMappingURL=prisma.service.js.map
+], CodeReaderService);
+exports.CodeReaderService = CodeReaderService;
+//# sourceMappingURL=code_reader.service.js.map
