@@ -144,15 +144,17 @@ let doc_query_service = class doc_query_service {
         console.log('Vector store init');
         const query_embed = await this.generateEmbedQuery(query);
         const pineCone_index = await this.pineConeService.setUp();
+        const file_name = await this.get_file_name_from_db(doc_id);
         const similairtySearch = await pineCone_index.query({
             queryRequest: { vector: query_embed,
                 topK: 5,
                 includeMetadata: true,
+                namespace: file_name
             }
         });
         let selected_str = [];
-        for (let i = 0; i < similairtySearch.matches.length; i++) {
-            const current_k_result = similairtySearch.matches[i];
+        for (const element of similairtySearch.matches) {
+            const current_k_result = element;
             selected_str.push({ id: current_k_result.id,
                 string: current_k_result.metadata });
         }
@@ -236,6 +238,14 @@ let doc_query_service = class doc_query_service {
         console.log(decode_info);
         const { sub } = decode_info;
         return sub;
+    }
+    async get_file_name_from_db(doc_id) {
+        const { FileName } = await this.prisma.document.findUnique({
+            where: {
+                doc_id: doc_id
+            }
+        });
+        return FileName;
     }
     async put_file_to_S3(doc_id, file) {
         const command = new client_s3_1.PutObjectCommand({

@@ -21,7 +21,7 @@ let GitService = class GitService {
             recursive: true,
             unknown: "warn",
             ignoreFiles: ignorePath,
-            accessToken: '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'
+            accessToken: ''
         });
         const docs = await loader.load();
         console.log({ docs });

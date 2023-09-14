@@ -167,15 +167,17 @@ export class doc_query_service {
     */
     const query_embed =await  this.generateEmbedQuery(query);
     const pineCone_index = await this.pineConeService.setUp()
+    const file_name = await this.get_file_name_from_db(doc_id);
     const similairtySearch = await pineCone_index.query({
       queryRequest:
       {vector:query_embed ,
         topK:5,
         includeMetadata:true,
+        namespace:file_name
  
       }})
       let selected_str : {string:object,id:string}[]= []
-    for(let i = 0; i < similairtySearch.matches.length; i++){
+    for(const element of similairtySearch.matches){
       /**{
   id: 'CoverLEtter.pdf1',
   score: 0.677316189,
@@ -185,7 +187,7 @@ export class doc_query_service {
     pageContent: 'Pytest that reduced manual testing effort by 90% and ensured daily full endpoint coverage testing with alerts. ● Performing API testing and collabor ating with the teams to prioritize and resolve bugs and technical debts using Jira and Git. ● Recognizing display issues on the company dashboar d and successfully assisting developers to fix them, resulting in improved user experience. ● Learning and building a demo backend API service based on Nest.JS in a short amount of time, taking feedback from senior devs and adapting concepts like modular design and good styling that reduced code size by 50%. ● Reporting on Jira Kanban whenever a bug/problem was discovered and keeping 100% attendance at daily standup meetings. I am eager to learn more about V aultt projects and how to apply my skills to them. I am a fast learner who can adapt to different environments and challenges. I have excellent'
   }
 } */
-    const current_k_result = similairtySearch.matches[i]
+    const current_k_result = element
       selected_str.push({id:current_k_result.id,
                          string: current_k_result.metadata})
     }
@@ -311,6 +313,14 @@ export class doc_query_service {
     console.log(decode_info)
     const {sub} = decode_info;
     return sub 
+  }
+  async get_file_name_from_db(doc_id:string):Promise<string> {
+      const {FileName} = await this.prisma.document.findUnique({
+        where:{
+          doc_id:doc_id
+        }
+      }) 
+      return FileName;
   }
   async put_file_to_S3(doc_id:string,file: Express.Multer.File) {
     const command =    new PutObjectCommand({

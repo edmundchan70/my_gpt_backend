@@ -48,6 +48,7 @@ export declare class doc_query_service {
         id: number;
     }>;
     get_userId_by_token(token: string): Promise<number>;
+    get_file_name_from_db(doc_id: string): Promise<string>;
     put_file_to_S3(doc_id: string, file: Express.Multer.File): Promise<import("@aws-sdk/client-s3").PutObjectCommandOutput>;
     get_file_from_S3(fileName: string): Promise<any>;
     update_chat(doc_id: string, owner_id: number, Message: string, role: "AI" | "HUMAN"): Promise<{
