@@ -207,6 +207,7 @@ let doc_query_service = class doc_query_service {
                 MessageTime: "asc"
             }
         });
+        console.log(resp);
         return resp;
     }
     async retreive_text_chunk(doc_id, user_id) {

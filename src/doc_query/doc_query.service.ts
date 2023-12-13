@@ -20,7 +20,6 @@ import { chat_body } from './DTO/chat_body.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { Vector } from '@pinecone-database/pinecone';
 
-
 @Injectable()
 export class doc_query_service {
   constructor(private openAiService: openAiService,
@@ -159,7 +158,7 @@ export class doc_query_service {
     console.log('Vector store init')
 
     //connect pinecone here 
-   
+
     /*
     const vectorStore = await PineconeStore.fromDocuments(text_chunk_array, new TensorFlowEmbeddings(),{
         pineconeIndex:pineCone_index
@@ -187,14 +186,16 @@ export class doc_query_service {
     pageContent: 'Pytest that reduced manual testing effort by 90% and ensured daily full endpoint coverage testing with alerts. ● Performing API testing and collabor ating with the teams to prioritize and resolve bugs and technical debts using Jira and Git. ● Recognizing display issues on the company dashboar d and successfully assisting developers to fix them, resulting in improved user experience. ● Learning and building a demo backend API service based on Nest.JS in a short amount of time, taking feedback from senior devs and adapting concepts like modular design and good styling that reduced code size by 50%. ● Reporting on Jira Kanban whenever a bug/problem was discovered and keeping 100% attendance at daily standup meetings. I am eager to learn more about V aultt projects and how to apply my skills to them. I am a fast learner who can adapt to different environments and challenges. I have excellent'
   }
 } */
-    const current_k_result = element
+  
+const current_k_result = element
       selected_str.push({id:current_k_result.id,
                          string: current_k_result.metadata})
     }
     console.log("Queried db simliarity search: ",selected_str)
+    //const model = 
     return {msg: JSON.stringify(selected_str)}
-    //query to openAI with query stringify object;
-
+     //query to openAI with query stringify object;
+    
 
    /* const {text} = await chain.call({
       query: query
@@ -266,6 +267,7 @@ export class doc_query_service {
   }
   async retrieve_conversation(doc_id:string,token:string){
     const owner_id = await this.get_userId_by_token(token);
+    
     const resp =  await this.prisma.conversation.findMany({
       where:{
         owner_id:owner_id,
@@ -279,6 +281,7 @@ export class doc_query_service {
         MessageTime:"asc"
       }
     })
+    console.log(resp)
       return resp ;
   }
   

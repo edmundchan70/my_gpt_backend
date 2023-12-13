@@ -35,8 +35,7 @@ export class doc_query_controller {
         new ParseFilePipe({
             validators:[
                 new FileTypeValidator({fileType: "pdf"})]
-        })) file: Express.Multer.File)
-        {
+        })) file: Express.Multer.File){
             console.log(file.originalname)
     return this.doc_query_service.file_to_text_chunk(file,token)
 
