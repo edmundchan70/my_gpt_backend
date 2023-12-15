@@ -73,8 +73,8 @@ export class doc_query_service {
       throw new ForbiddenException("FILE NAME MUST BE UNIQUE ")
     }
     //Init S3 command and save the file 
-    await this.put_file_to_S3(doc_id,file);
-    console.log("SAVED TO S3")
+   // await this.put_file_to_S3(doc_id,file);
+   // console.log("SAVED TO S3")
  
     //save text chunk to db
 

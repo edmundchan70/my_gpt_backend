@@ -8,10 +8,24 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ParaPhraserModule = void 0;
 const common_1 = require("@nestjs/common");
+const para_phraser_controller_1 = require("./para-phraser.controller");
+const para_phraser_service_1 = require("./para-phraser.service");
+const doc_query_module_1 = require("../doc_query/doc_query.module");
+const doc_query_service_1 = require("../doc_query/doc_query.service");
+const auth_service_1 = require("../auth/auth.service");
+const openAi_module_1 = require("../service_provider/openAI/openAi.module");
+const pinecone_module_1 = require("../service_provider/pinecone/pinecone.module");
+const prisma_module_1 = require("../prisma/prisma.module");
+const jwt_1 = require("@nestjs/jwt");
+const S3_module_1 = require("../service_provider/S3/S3.module");
 let ParaPhraserModule = class ParaPhraserModule {
 };
 ParaPhraserModule = __decorate([
-    (0, common_1.Module)({})
+    (0, common_1.Module)({
+        imports: [doc_query_module_1.doc_query_module, openAi_module_1.openAiModule, pinecone_module_1.pineconeModule, prisma_module_1.PrismaModule, jwt_1.JwtModule, S3_module_1.S3_Module],
+        controllers: [para_phraser_controller_1.ParaPhraserController],
+        providers: [para_phraser_service_1.ParaPhraserService, doc_query_service_1.doc_query_service, auth_service_1.AuthService]
+    })
 ], ParaPhraserModule);
 exports.ParaPhraserModule = ParaPhraserModule;
 //# sourceMappingURL=para-phraser.module.js.map

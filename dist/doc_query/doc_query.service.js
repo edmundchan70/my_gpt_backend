@@ -75,8 +75,6 @@ let doc_query_service = class doc_query_service {
         catch (err) {
             throw new common_1.ForbiddenException("FILE NAME MUST BE UNIQUE ");
         }
-        await this.put_file_to_S3(doc_id, file);
-        console.log("SAVED TO S3");
         const text_chunk_db = (0, HNSWLib_1.text_chunk_to_DB)(split_text, doc_id, id);
         await this.prisma.textChunk.createMany({
             data: text_chunk_db
