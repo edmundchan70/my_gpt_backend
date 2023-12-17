@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
-import { RetrievalQAChain, VectorDBQAChain } from "langchain/chains"
+import { RunnableSequence } from "langchain/schema/runnable";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { text_chunk } from './DTO/text_chunk.dto';
 import { openAiService } from 'src/service_provider/openAI/openAi.service';
@@ -27,40 +27,24 @@ export class doc_query_service {
      private prisma: PrismaService,
      private jwtService: JwtService ,
      private S3 : S3Service,
-     private authService: AuthService,
-    
-     ) {
-  
-      }
+     private authService: AuthService,) {}
   
   async file_to_text_chunk(file: Express.Multer.File, token: string) {
     const loader = new PDFLoader(new Blob([file.buffer], { type: 'application/pdf' }), {
       splitPages: false,
     });
     const docs = await loader.load();
-    /* const splitter = new CharacterTextSplitter({
-         separator: ".",
-         chunkSize:chunkSize,
-         chunkOverlap:chunkOverlap,
-      }); */
     const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 700, chunkOverlap: 300 });
     const split_text = await splitter.splitDocuments(docs);
     const fileName = file.originalname
 
-    //filter out the metadata in output
-    const output = split_text.map(item => {
-      const { metadata, ...newItem } = item;
-      return newItem
-    })
     const rawData = text_chunktoString(split_text);
     const doc_id = randomUUID()
  
      
     const  decoded_info :any  = this.jwtService.decode(token.slice("Bearer ".length));
-  
- 
     const {id} = await this.get_userId_by_email(decoded_info.email)
-    //doc_id will also be S3 fileName
+
     try{
     await this.prisma.document.create({
       data:{
@@ -72,29 +56,21 @@ export class doc_query_service {
     })}catch(err:any){
       throw new ForbiddenException("FILE NAME MUST BE UNIQUE ")
     }
-    //Init S3 command and save the file 
-   // await this.put_file_to_S3(doc_id,file);
-   // console.log("SAVED TO S3")
- 
-    //save text chunk to db
+    //save to S3 
+    await this.put_file_to_S3(doc_id,file);
 
     const text_chunk_db = text_chunk_to_DB(split_text,doc_id,id)
-    
     await this.prisma.textChunk.createMany({
       data: text_chunk_db
     })
+
     console.log("SUCCESSFUL ADDED RECORD THROUGH PRISMA")
-     //connect pinecone here 
      const filter_skip_line = text_chunk_filter_skipLine(split_text);
      console.log(filter_skip_line)
      const embedding_for_doc =await this.generateEmbedding(filter_skip_line,fileName)
      await this.pineConeService.setUp()
      await this.pineConeService.upsertVector(embedding_for_doc,fileName)
      console.log("\n Successfully setup pinecone ")
-  /*   const resp = await PineconeStore.fromDocuments(split_text, new TensorFlowEmbeddings(),{
-         pineconeIndex:pineCone_index
-     });*/
-     
      console.log("\n Successfully added embeding")
      console.log("COMPLETED REQIESRT file_to_text_chunk")
     return {
@@ -103,51 +79,6 @@ export class doc_query_service {
     }
   }
 
-  async chat_retrievalQAChain({doc_id,query}: chat_body , token: string) {
-    const owner_id = await this.get_userId_by_token(token)
-    console.log("chat_retrievalQAChain call activated")
-    const model = new OpenAI({
-      openAIApiKey: process.env.OPENAI_API_KEY_TEST,
-      modelName: "gpt-4"
-    })
-    console.log('Vector store init')
-    //transform data in db into corresponding data structure
-    const text_chunk_array : text_chunk[] = await DB_to_text_chunk(await this.retreive_text_chunk(doc_id,owner_id));
-
-    const vectorStore = await HNSWLib.fromDocuments(text_chunk_array,  new OpenAIEmbeddings({
-      openAIApiKey: process.env.OPENA_API_KEY,
-      modelName:"text-embedding-ada-002"
-    }));
-
-    const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
-    console.log("Querying llm call activated",query)
-    const {text} = await chain.call({
-      query: query
-    });
-    console.log(text)
-    //save to db 
-    const HUMAN_MESSAGE : conversation={
-      doc_id: doc_id,
-      owner_id: owner_id,
-      role: "HUMAN",
-      Message:query
-    }
-    const AI_RESPONSE: conversation={
-      doc_id: doc_id,
-      owner_id: owner_id,
-      role: "AI",
-      Message:text
-    }
-    //add HUMAN MESSAGE 
-    await this.prisma.conversation.create({
-      data:HUMAN_MESSAGE
-    })
-    //add AI Message 
-    await this.prisma.conversation.create({
-      data:AI_RESPONSE
-    })
-    return { msg: text }
-  }
   async chat_retrievalQAChain_PINECONE({doc_id,query}: chat_body , token: string) {
     const owner_id = await this.get_userId_by_token(token)
     console.log("chat_retrievalQAChain_PINECONE call activated")
@@ -193,11 +124,16 @@ const current_k_result = element
     }
     console.log("Queried db simliarity search: ",selected_str)
     //const model = 
-    return {msg: JSON.stringify(selected_str)}
+    // return {msg: JSON.stringify(selected_str)}
      //query to openAI with query stringify object;
     
-
-   /* const {text} = await chain.call({
+   const chain = RunnableSequence.from([
+    {
+      question: (input: { question: string; chatHistory?: string }) =>
+      input.question
+    }
+   ]);
+   const {text} = await chain.call({
       query: query
     });
     console.log(text)
@@ -222,7 +158,7 @@ const current_k_result = element
     await this.prisma.conversation.create({
       data:AI_RESPONSE
     })
-    return { msg: text }*/
+    return { msg: text }
   }
   async get_user_document_list(token: string){
    const decode_info :user_info = await this.authService.decode_user_from_token(token);
@@ -284,7 +220,11 @@ const current_k_result = element
     console.log(resp)
       return resp ;
   }
-  
+ 
+  async deleteDocAndTextChunk(){
+    await this.prisma.textChunk.deleteMany({} );
+    await this.prisma.document.deleteMany({});
+  }
   //helper functions 
   async retreive_text_chunk(doc_id:string,user_id : number){
     const text_chunk = await this.prisma.textChunk.findMany({
@@ -334,6 +274,7 @@ const current_k_result = element
     try {
       const response = await this.S3.send(command);
       console.log(response);
+      console.log("SAved to")
       return response
     } catch (err) {
         throw err

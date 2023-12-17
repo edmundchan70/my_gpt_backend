@@ -7,7 +7,7 @@ export declare class doc_query_controller {
     constructor(doc_query_service: doc_query_service);
     check_doc_query(): void;
     chat(chat_body: chat_body, token: string): Promise<{
-        msg: string;
+        msg: any;
     }>;
     handle_file(token: string, Body: any, file: Express.Multer.File): Promise<{
         doc_id: string;
@@ -30,5 +30,6 @@ export declare class doc_query_controller {
         Message: string;
         role: import(".prisma/client").$Enums.conversation_role;
     }[]>;
+    deleteAll(): Promise<void>;
     tester(): void;
 }

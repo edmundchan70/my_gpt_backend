@@ -30,7 +30,6 @@ export class AuthController {
     @Post('logout')
     @HttpCode(HttpStatus.OK)
     logOut(@GetCurrentUserId() userId: number){
-       
         return this.authService.logOut(userId);
     } 
      

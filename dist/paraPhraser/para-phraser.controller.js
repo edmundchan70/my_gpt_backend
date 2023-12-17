@@ -20,19 +20,25 @@ let ParaPhraserController = class ParaPhraserController {
     constructor(ParaPhraserService) {
         this.ParaPhraserService = ParaPhraserService;
     }
-    handleFile(token, file) {
-        return this.ParaPhraserService.handleFile(file, token);
+    handle_file(token, Body, file) {
+        console.log(file.originalname);
+        return this.ParaPhraserService.file_to_text_chunk(file, token);
     }
 };
 __decorate([
     (0, common_1.Post)('uploadFile'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('document')),
     __param(0, (0, common_1.Headers)('Authorization')),
-    __param(1, (0, common_1.UploadedFile)()),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.UploadedFile)(new common_1.ParseFilePipe({
+        validators: [
+            new common_1.FileTypeValidator({ fileType: "pdf" })
+        ]
+    }))),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", void 0)
-], ParaPhraserController.prototype, "handleFile", null);
+], ParaPhraserController.prototype, "handle_file", null);
 ParaPhraserController = __decorate([
     (0, common_1.Controller)('para-phraser'),
     __metadata("design:paramtypes", [para_phraser_service_1.ParaPhraserService])

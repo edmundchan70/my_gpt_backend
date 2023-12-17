@@ -8,27 +8,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.doc_query_service = void 0;
 const common_1 = require("@nestjs/common");
 const pdf_1 = require("langchain/document_loaders/fs/pdf");
-const chains_1 = require("langchain/chains");
+const runnable_1 = require("langchain/schema/runnable");
 const openai_1 = require("langchain/embeddings/openai");
 const openAi_service_1 = require("../service_provider/openAI/openAi.service");
 const pinecone_service_1 = require("../service_provider/pinecone/pinecone.service");
 const openai_2 = require("langchain/llms/openai");
-const hnswlib_1 = require("langchain/vectorstores/hnswlib");
 const crypto_1 = require("crypto");
 const jwt_1 = require("@nestjs/jwt");
 const prisma_service_1 = require("../prisma/prisma.service");
@@ -54,10 +42,6 @@ let doc_query_service = class doc_query_service {
         const splitter = new text_splitter_1.RecursiveCharacterTextSplitter({ chunkSize: 700, chunkOverlap: 300 });
         const split_text = await splitter.splitDocuments(docs);
         const fileName = file.originalname;
-        const output = split_text.map(item => {
-            const { metadata } = item, newItem = __rest(item, ["metadata"]);
-            return newItem;
-        });
         const rawData = (0, HNSWLib_1.text_chunktoString)(split_text);
         const doc_id = (0, crypto_1.randomUUID)();
         const decoded_info = this.jwtService.decode(token.slice("Bearer ".length));
@@ -75,6 +59,7 @@ let doc_query_service = class doc_query_service {
         catch (err) {
             throw new common_1.ForbiddenException("FILE NAME MUST BE UNIQUE ");
         }
+        await this.put_file_to_S3(doc_id, file);
         const text_chunk_db = (0, HNSWLib_1.text_chunk_to_DB)(split_text, doc_id, id);
         await this.prisma.textChunk.createMany({
             data: text_chunk_db
@@ -92,45 +77,6 @@ let doc_query_service = class doc_query_service {
             doc_id: doc_id,
             FileName: fileName,
         };
-    }
-    async chat_retrievalQAChain({ doc_id, query }, token) {
-        const owner_id = await this.get_userId_by_token(token);
-        console.log("chat_retrievalQAChain call activated");
-        const model = new openai_2.OpenAI({
-            openAIApiKey: process.env.OPENAI_API_KEY_TEST,
-            modelName: "gpt-4"
-        });
-        console.log('Vector store init');
-        const text_chunk_array = await (0, HNSWLib_1.DB_to_text_chunk)(await this.retreive_text_chunk(doc_id, owner_id));
-        const vectorStore = await hnswlib_1.HNSWLib.fromDocuments(text_chunk_array, new openai_1.OpenAIEmbeddings({
-            openAIApiKey: process.env.OPENA_API_KEY,
-            modelName: "text-embedding-ada-002"
-        }));
-        const chain = chains_1.RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
-        console.log("Querying llm call activated", query);
-        const { text } = await chain.call({
-            query: query
-        });
-        console.log(text);
-        const HUMAN_MESSAGE = {
-            doc_id: doc_id,
-            owner_id: owner_id,
-            role: "HUMAN",
-            Message: query
-        };
-        const AI_RESPONSE = {
-            doc_id: doc_id,
-            owner_id: owner_id,
-            role: "AI",
-            Message: text
-        };
-        await this.prisma.conversation.create({
-            data: HUMAN_MESSAGE
-        });
-        await this.prisma.conversation.create({
-            data: AI_RESPONSE
-        });
-        return { msg: text };
     }
     async chat_retrievalQAChain_PINECONE({ doc_id, query }, token) {
         const owner_id = await this.get_userId_by_token(token);
@@ -157,7 +103,34 @@ let doc_query_service = class doc_query_service {
                 string: current_k_result.metadata });
         }
         console.log("Queried db simliarity search: ", selected_str);
-        return { msg: JSON.stringify(selected_str) };
+        const chain = runnable_1.RunnableSequence.from([
+            {
+                question: (input) => input.question
+            }
+        ]);
+        const { text } = await chain.call({
+            query: query
+        });
+        console.log(text);
+        const HUMAN_MESSAGE = {
+            doc_id: doc_id,
+            owner_id: owner_id,
+            role: "HUMAN",
+            Message: query
+        };
+        const AI_RESPONSE = {
+            doc_id: doc_id,
+            owner_id: owner_id,
+            role: "AI",
+            Message: text
+        };
+        await this.prisma.conversation.create({
+            data: HUMAN_MESSAGE
+        });
+        await this.prisma.conversation.create({
+            data: AI_RESPONSE
+        });
+        return { msg: text };
     }
     async get_user_document_list(token) {
         const decode_info = await this.authService.decode_user_from_token(token);
@@ -208,6 +181,10 @@ let doc_query_service = class doc_query_service {
         console.log(resp);
         return resp;
     }
+    async deleteDocAndTextChunk() {
+        await this.prisma.textChunk.deleteMany({});
+        await this.prisma.document.deleteMany({});
+    }
     async retreive_text_chunk(doc_id, user_id) {
         const text_chunk = await this.prisma.textChunk.findMany({
             where: {
@@ -255,6 +232,7 @@ let doc_query_service = class doc_query_service {
         try {
             const response = await this.S3.send(command);
             console.log(response);
+            console.log("SAved to");
             return response;
         }
         catch (err) {

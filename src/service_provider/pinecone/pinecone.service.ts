@@ -21,12 +21,10 @@ export class pineconeService  {
     }
     async upsertVector(embeddings: Vector[],fileName:string){
        await this.setUp();
-
        const index = this.pinecone_client.Index(process.env.pinecone_index)
        const upserRequest : UpsertRequest = {
         vectors: embeddings,
         namespace:fileName
-        
        }
        const upsertResponse = await index.upsert({
         upsertRequest: upserRequest

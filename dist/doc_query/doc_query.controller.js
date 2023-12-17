@@ -44,6 +44,9 @@ let doc_query_controller = class doc_query_controller {
     retrieve_conversation(token, { doc_id }) {
         return this.doc_query_service.retrieve_conversation(doc_id, token);
     }
+    deleteAll() {
+        return this.doc_query_service.deleteDocAndTextChunk();
+    }
     tester() {
     }
 };
@@ -62,6 +65,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], doc_query_controller.prototype, "chat", null);
 __decorate([
+    (0, decorators_1.Public)(),
     (0, common_1.Post)('upload_pdf'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('document')),
     __param(0, (0, common_1.Headers)('Authorization')),
@@ -106,6 +110,13 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], doc_query_controller.prototype, "retrieve_conversation", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)("deleteAll"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], doc_query_controller.prototype, "deleteAll", null);
 __decorate([
     (0, decorators_1.Public)(),
     (0, common_1.Post)("test"),

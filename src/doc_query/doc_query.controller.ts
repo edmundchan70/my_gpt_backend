@@ -10,7 +10,7 @@ import { Document_id } from './DTO/Document_id.dto';
  
  
  
- 
+
 @Controller('doc_query')
 export class doc_query_controller {
     constructor(private doc_query_service : doc_query_service){}
@@ -19,6 +19,7 @@ export class doc_query_controller {
     check_doc_query(){
         console.log("doc_query running");
     }
+
     @Post('chat')
     chat(@Body()chat_body : chat_body ,
          @Headers('Authorization') token: string){
@@ -26,6 +27,7 @@ export class doc_query_controller {
         return this.doc_query_service.chat_retrievalQAChain_PINECONE(chat_body,token);
     }
  
+    @Public()
     @Post('upload_pdf')
     @UseInterceptors(FileInterceptor('document'))
     handle_file(
@@ -66,7 +68,11 @@ export class doc_query_controller {
         @Body() {doc_id} : Document_id){
             return this.doc_query_service.retrieve_conversation(doc_id,token);
         }
-    
+    @Public()
+    @Post("deleteAll")
+    deleteAll(){
+        return this.doc_query_service.deleteDocAndTextChunk();
+    }
     //tester
     @Public()
     @Post("test")

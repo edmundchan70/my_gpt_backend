@@ -13,6 +13,9 @@ exports.ParaPhraserService = void 0;
 const common_1 = require("@nestjs/common");
 const doc_query_service_1 = require("../doc_query/doc_query.service");
 let ParaPhraserService = class ParaPhraserService {
+    file_to_text_chunk(file, token) {
+        throw new Error('Method not implemented.');
+    }
     constructor(doc_query_service) {
         this.doc_query_service = doc_query_service;
     }
