@@ -11,10 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pineconeService = void 0;
 const common_1 = require("@nestjs/common");
+const chains_1 = require("langchain/chains");
 const pinecone_1 = require("@pinecone-database/pinecone");
+const pinecone_2 = require("langchain/vectorstores/pinecone");
+const openAi_service_1 = require("../openAI/openAi.service");
 let pineconeService = class pineconeService {
-    constructor(pinecone_client) {
+    constructor(pinecone_client, openAIService) {
         this.pinecone_client = pinecone_client;
+        this.openAIService = openAIService;
     }
     async setUp() {
         await this.pinecone_client.init({
@@ -40,21 +44,23 @@ let pineconeService = class pineconeService {
         console.log("SUCCESSFUL UPSERT , : ", upsertResponse);
     }
     async similairtySearch(query) {
-        const index = await this.setUp();
-        const resp = await index.query({
-            queryRequest: {
-                vector: query,
-                topK: 5,
-                includeMetadata: true,
-                includeValues: true,
-            },
+        const pineconeIndex = await this.setUp();
+        const embedding = this.openAIService.getEmbedding();
+        const vectorStore = await pinecone_2.PineconeStore.fromExistingIndex(embedding, { pineconeIndex: pineconeIndex });
+        const test = await vectorStore.similaritySearch(query, 5);
+        console.log("TEST for similaity result: ", test);
+        const model = this.openAIService.getModel();
+        const chain = chains_1.VectorDBQAChain.fromLLM(model, vectorStore, {
+            k: 3,
+            returnSourceDocuments: true
         });
-        console.log(resp);
+        return await chain.call({ query: query });
     }
 };
 pineconeService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [pinecone_1.PineconeClient])
+    __metadata("design:paramtypes", [pinecone_1.PineconeClient,
+        openAi_service_1.openAiService])
 ], pineconeService);
 exports.pineconeService = pineconeService;
 //# sourceMappingURL=pinecone.service.js.map

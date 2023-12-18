@@ -11,11 +11,12 @@ const common_1 = require("@nestjs/common");
 const pinecone_service_1 = require("./pinecone.service");
 const config_1 = require("@nestjs/config");
 const pinecone_1 = require("@pinecone-database/pinecone");
+const openAi_module_1 = require("../openAI/openAi.module");
 let pineconeModule = class pineconeModule {
 };
 pineconeModule = __decorate([
     (0, common_1.Module)({
-        imports: [config_1.ConfigModule.forRoot()],
+        imports: [config_1.ConfigModule.forRoot(), openAi_module_1.openAiModule],
         providers: [pinecone_service_1.pineconeService, pinecone_1.PineconeClient],
         exports: [pinecone_service_1.pineconeService]
     })

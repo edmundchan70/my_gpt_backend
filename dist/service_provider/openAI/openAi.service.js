@@ -9,8 +9,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.openAiService = void 0;
 const common_1 = require("@nestjs/common");
 const openai_1 = require("openai");
-require("@tensorflow/tfjs-backend-cpu");
+const openai_2 = require("langchain/llms/openai");
+const openai_3 = require("langchain/embeddings/openai");
 let openAiService = class openAiService {
+    getModel() {
+        return new openai_2.OpenAI({
+            openAIApiKey: process.env.OPENAI_API_KEY_TEST,
+            modelName: "gpt-4-vision-preview"
+        });
+    }
+    getEmbedding() {
+        const embedding = new openai_3.OpenAIEmbeddings({
+            openAIApiKey: process.env.OPENAI_API_KEY_TEST,
+            modelName: "text-embedding-ada-002"
+        });
+        return embedding;
+    }
+    async embedQuery(query) {
+        return await this.getEmbedding().embedQuery(query);
+    }
     async chat(query, data, API_KEY) {
         this.config = new openai_1.Configuration({
             organization: "org-EVepSWx7EGMJzKHT3eCJVvb4",

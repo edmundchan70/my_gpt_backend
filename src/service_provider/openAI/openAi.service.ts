@@ -1,15 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { Configuration, OpenAIApi } from "openai";
-import "@tensorflow/tfjs-backend-cpu";
 import { chat_message } from '../../DTO/openAI/chat_message.dto';
-import { text_chunk } from 'src/doc_query/DTO/text_chunk.dto';
-import { text_chunk_toString } from './util/text_chunk_toString';
+import { OpenAI } from 'langchain/llms/openai';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
  
  
 @Injectable()
 export class openAiService {
     private config: Configuration;
-    private openai: OpenAIApi;  
+    private openai: OpenAIApi;
+
+    public getModel(){
+        return  new OpenAI({
+            openAIApiKey: process.env.OPENAI_API_KEY_TEST,
+            modelName: "gpt-4-vision-preview"
+        })
+    }  
+    public  getEmbedding(){
+        const embedding = new OpenAIEmbeddings({
+            openAIApiKey: process.env.OPENAI_API_KEY_TEST,
+            modelName:"text-embedding-ada-002"
+          })
+        return embedding
+    }
+    public async embedQuery(query){
+        return await this.getEmbedding().embedQuery(query)
+    }
     async chat(query:string,data:string,API_KEY: string){
         this.config = new Configuration({
             organization: "org-EVepSWx7EGMJzKHT3eCJVvb4",
@@ -31,7 +47,7 @@ export class openAiService {
         });
         return resp.data;
     }
-      
+    
 }
 
 

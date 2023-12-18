@@ -12,11 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.doc_query_service = void 0;
 const common_1 = require("@nestjs/common");
 const pdf_1 = require("langchain/document_loaders/fs/pdf");
-const runnable_1 = require("langchain/schema/runnable");
 const openai_1 = require("langchain/embeddings/openai");
 const openAi_service_1 = require("../service_provider/openAI/openAi.service");
 const pinecone_service_1 = require("../service_provider/pinecone/pinecone.service");
-const openai_2 = require("langchain/llms/openai");
 const crypto_1 = require("crypto");
 const jwt_1 = require("@nestjs/jwt");
 const prisma_service_1 = require("../prisma/prisma.service");
@@ -39,7 +37,7 @@ let doc_query_service = class doc_query_service {
             splitPages: false,
         });
         const docs = await loader.load();
-        const splitter = new text_splitter_1.RecursiveCharacterTextSplitter({ chunkSize: 700, chunkOverlap: 300 });
+        const splitter = new text_splitter_1.RecursiveCharacterTextSplitter({ chunkSize: 300, chunkOverlap: 150 });
         const split_text = await splitter.splitDocuments(docs);
         const fileName = file.originalname;
         const rawData = (0, HNSWLib_1.text_chunktoString)(split_text);
@@ -78,59 +76,11 @@ let doc_query_service = class doc_query_service {
             FileName: fileName,
         };
     }
-    async chat_retrievalQAChain_PINECONE({ doc_id, query }, token) {
-        const owner_id = await this.get_userId_by_token(token);
+    async chat_retrievalQAChain_PINECONE({ query }, token) {
         console.log("chat_retrievalQAChain_PINECONE call activated");
-        const model = new openai_2.OpenAI({
-            openAIApiKey: process.env.OPENAI_API_KEY_TEST,
-            modelName: "gpt-4"
-        });
-        console.log('Vector store init');
-        const query_embed = await this.generateEmbedQuery(query);
-        const pineCone_index = await this.pineConeService.setUp();
-        const file_name = await this.get_file_name_from_db(doc_id);
-        const similairtySearch = await pineCone_index.query({
-            queryRequest: { vector: query_embed,
-                topK: 5,
-                includeMetadata: true,
-                namespace: file_name
-            }
-        });
-        let selected_str = [];
-        for (const element of similairtySearch.matches) {
-            const current_k_result = element;
-            selected_str.push({ id: current_k_result.id,
-                string: current_k_result.metadata });
-        }
-        console.log("Queried db simliarity search: ", selected_str);
-        const chain = runnable_1.RunnableSequence.from([
-            {
-                question: (input) => input.question
-            }
-        ]);
-        const { text } = await chain.call({
-            query: query
-        });
-        console.log(text);
-        const HUMAN_MESSAGE = {
-            doc_id: doc_id,
-            owner_id: owner_id,
-            role: "HUMAN",
-            Message: query
-        };
-        const AI_RESPONSE = {
-            doc_id: doc_id,
-            owner_id: owner_id,
-            role: "AI",
-            Message: text
-        };
-        await this.prisma.conversation.create({
-            data: HUMAN_MESSAGE
-        });
-        await this.prisma.conversation.create({
-            data: AI_RESPONSE
-        });
-        return { msg: text };
+        const resp = await this.pineConeService.similairtySearch(query);
+        console.log(resp);
+        return JSON.stringify(resp);
     }
     async get_user_document_list(token) {
         const decode_info = await this.authService.decode_user_from_token(token);
@@ -267,21 +217,18 @@ let doc_query_service = class doc_query_service {
     }
     async generate_summary(doc_id, token) {
         const query = 'GIVE ME THE SUMMARY OF THE DOCUMENT';
-        const resp = await this.chat_retrievalQAChain({ doc_id: doc_id, query: query }, token);
+        const resp = await this.chat_retrievalQAChain_PINECONE({ doc_id, query: query }, token);
         console.log(resp);
-        return resp.msg;
+        return resp;
     }
     async generateEmbedding(split_text, fileName) {
-        const embedding_model = new openai_1.OpenAIEmbeddings({
-            openAIApiKey: process.env.OPENAI_API_KEY_TEST,
-            modelName: "text-embedding-ada-002"
-        });
+        const embedding_model = this.openAiService.getEmbedding();
         console.log('generate embedding called');
-        var text_chunk_counter = 0;
-        var valid_vector_for_pinecone_upsert = [];
+        let text_chunk_counter = 0;
+        let valid_vector_for_pinecone_upsert = [];
         console.log(split_text.length);
-        for (let i = 0; i < split_text.length; i++) {
-            const { pageContent } = split_text[i];
+        for (const element of split_text) {
+            const { pageContent } = element;
             const current_embed = await embedding_model.embedQuery(pageContent);
             const id = fileName + String(text_chunk_counter);
             valid_vector_for_pinecone_upsert.push({

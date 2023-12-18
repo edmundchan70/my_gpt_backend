@@ -19,9 +19,7 @@ export declare class doc_query_service {
         doc_id: string;
         FileName: string;
     }>;
-    chat_retrievalQAChain_PINECONE({ doc_id, query }: chat_body, token: string): Promise<{
-        msg: any;
-    }>;
+    chat_retrievalQAChain_PINECONE({ query }: chat_body, token: string): Promise<string>;
     get_user_document_list(token: string): Promise<{
         doc_id: string;
         FileName: string;
@@ -57,7 +55,7 @@ export declare class doc_query_service {
         Message: string;
         role: import(".prisma/client").$Enums.conversation_role;
     }>;
-    generate_summary(doc_id: string, token: string): Promise<any>;
+    generate_summary(doc_id: string, token: string): Promise<string>;
     generateEmbedding(split_text: {
         pageContent: string;
     }[], fileName: string): Promise<Vector[]>;
