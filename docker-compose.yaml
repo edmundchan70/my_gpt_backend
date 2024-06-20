@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  db:
+    container_name: postgres_parser
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: parser
+    ports:
+      - "1234:1234"

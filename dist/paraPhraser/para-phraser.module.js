@@ -8,10 +8,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ParaPhraserModule = void 0;
 const common_1 = require("@nestjs/common");
+const para_phraser_controller_1 = require("./para-phraser.controller");
+const para_phraser_service_1 = require("./para-phraser.service");
 let ParaPhraserModule = class ParaPhraserModule {
 };
 ParaPhraserModule = __decorate([
-    (0, common_1.Module)({})
+    (0, common_1.Module)({
+        imports: [],
+        controllers: [para_phraser_controller_1.ParaPhraserController],
+        providers: [para_phraser_service_1.ParaPhraserService]
+    })
 ], ParaPhraserModule);
 exports.ParaPhraserModule = ParaPhraserModule;
 //# sourceMappingURL=para-phraser.module.js.map
