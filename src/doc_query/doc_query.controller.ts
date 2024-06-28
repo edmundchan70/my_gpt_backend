@@ -2,9 +2,7 @@ import { Controller, UseInterceptors, UploadedFile, Post, ParseFilePipe, FileTyp
  import {FileInterceptor} from "@nestjs/platform-express"
 import { doc_query_service } from './doc_query.service';
 import { chat_body } from './DTO/chat_body.dto';
-import { config_text_chunk } from 'src/doc_query/DTO/config_text_chunk.dto';
 import { Public } from 'src/common/decorators';
-import { S3Service } from 'src/service_provider/S3/S3.service';
 import { Document_id } from './DTO/Document_id.dto';
  
  

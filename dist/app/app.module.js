@@ -16,12 +16,11 @@ const user_module_1 = require("../user/user.module");
 const pinecone_module_1 = require("../service_provider/pinecone/pinecone.module");
 const git_module_1 = require("../service_provider/git/git.module");
 const test_module_1 = require("../test/test.module");
-const para_phraser_module_1 = require("../paraPhraser/para-phraser.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [auth_module_1.AuthModule, doc_query_module_1.doc_query_module, openAi_module_1.openAiModule, prisma_module_1.PrismaModule, user_module_1.user_Module, pinecone_module_1.pineconeModule, git_module_1.GitModule, test_module_1.TestModule, para_phraser_module_1.ParaPhraserModule],
+        imports: [auth_module_1.AuthModule, doc_query_module_1.doc_query_module, openAi_module_1.openAiModule, prisma_module_1.PrismaModule, user_module_1.user_Module, pinecone_module_1.pineconeModule, git_module_1.GitModule, test_module_1.TestModule],
     })
 ], AppModule);
 exports.AppModule = AppModule;

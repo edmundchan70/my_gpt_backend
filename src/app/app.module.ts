@@ -11,10 +11,10 @@ import { user_Module } from 'src/user/user.module';
 import { pineconeModule } from 'src/service_provider/pinecone/pinecone.module';
 import { GitModule } from 'src/service_provider/git/git.module';
 import { TestModule } from 'src/test/test.module';
-import { ParaPhraserModule } from 'src/paraPhraser/para-phraser.module';
+
 
 @Module({
-  imports: [AuthModule ,doc_query_module,openAiModule,PrismaModule,user_Module,pineconeModule,GitModule,TestModule,ParaPhraserModule],
+  imports: [AuthModule ,doc_query_module,openAiModule,PrismaModule,user_Module,pineconeModule,GitModule,TestModule],
  
 })
 export class AppModule {}
