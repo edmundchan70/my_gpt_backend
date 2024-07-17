@@ -1,6 +1,6 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import {PrismaClient} from ".prisma/client";
-import { S3Client, AbortMultipartUploadCommand  } from "@aws-sdk/client-s3";
+import { S3Client  } from "@aws-sdk/client-s3";
 @Injectable()
 export class S3Service extends S3Client  {
     constructor(){
